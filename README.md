@@ -12,5 +12,4 @@ sitemap.to_a # => Array of url strings
 
 ## Roadmap
 
-* Tests
 * `sitemap_index` support
