@@ -2,8 +2,8 @@ require File.join(File.dirname(__FILE__), 'helper')
 
 class TestSitemapParser < Test::Unit::TestCase
   def setup
-    @path = File.expand_path "./fixtures/sitemap.xml", File.dirname( __FILE__ )
-    @sitemap = SitemapParser.new @path
+    @url = "https://raw.githubusercontent.com/benbalter/sitemap-parser/master/test/fixtures/sitemap.xml"
+    @sitemap = SitemapParser.new @url
     @expected_count = 3
   end
 
