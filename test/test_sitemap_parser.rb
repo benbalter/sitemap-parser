@@ -20,4 +20,11 @@ class TestSitemapParser < Test::Unit::TestCase
   def test_sitemap
     assert_equal Nokogiri::XML::Document, @sitemap.sitemap.class
   end
+
+  def test_404
+    sitemap = SitemapParser.new "http://ben.balter.com/foo/bar/sitemap.xml"
+    assert_nothing_raised do
+      assert_equal nil, sitemap.urls
+    end
+  end
 end
