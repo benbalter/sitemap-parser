@@ -22,14 +22,20 @@ class SitemapParser
   end
 
   def sitemap
-    @sitemap ||= Nokogiri::XML(raw_sitemap) unless raw_sitemap.nil?
+    @sitemap ||= Nokogiri::XML(raw_sitemap)
+  rescue
+    nil
   end
 
   def urls
-    sitemap.at("urlset").search("url") unless sitemap.nil?
+    sitemap.at("urlset").search("url")
+  rescue
+    nil
   end
 
   def to_a
-    urls.map { |url| url.at("loc").content } unless urls.nil?
+    urls.map { |url| url.at("loc").content }
+  rescue
+    []
   end
 end
