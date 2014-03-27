@@ -9,15 +9,19 @@ class SitemapParser
 
   def raw_sitemap
     @raw_sitemap ||= begin
-      request = Typhoeus::Request.new(@url, followlocation: true)
-      request.on_complete do |response|
-        if response.success?
-          return response.body
-        else
-          return nil
+      if @url =~ /\Ahttp/i
+        request = Typhoeus::Request.new(@url, followlocation: true)
+        request.on_complete do |response|
+          if response.success?
+            return response.body
+          else
+            return nil
+          end
         end
+        request.run
+      elsif File.exist?(@url) && @url =~ /[\\\/]sitemap\.xml\Z/i
+        open(@url) { |f| f.read }
       end
-      request.run
     end
   end
 
