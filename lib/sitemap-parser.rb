@@ -3,14 +3,15 @@ require 'typhoeus'
 
 class SitemapParser
 
-  def initialize(url)
+  def initialize(url, opts = {})
     @url = url
+    @options = {:followlocation => true}.merge(opts)
   end
 
   def raw_sitemap
     @raw_sitemap ||= begin
       if @url =~ /\Ahttp/i
-        request = Typhoeus::Request.new(@url, followlocation: true)
+        request = Typhoeus::Request.new(@url, followlocation: @options[:followlocation])
         request.on_complete do |response|
           if response.success?
             return response.body
