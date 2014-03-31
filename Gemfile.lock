@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    sitemap-parser (0.1.0)
+    sitemap-parser (0.2.0)
       nokogiri (~> 1.5.6)
       typhoeus (~> 0.6.7)
 
