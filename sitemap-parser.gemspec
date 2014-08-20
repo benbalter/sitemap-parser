@@ -8,6 +8,6 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/benbalter/sitemap-parser"
   s.licenses = ["MIT"]
   s.files = [ "lib/sitemap-parser.rb" ]
-  s.add_dependency("nokogiri","~> 1.5.6")
+  s.add_dependency("nokogiri","~> 1.6")
   s.add_dependency("typhoeus", "~> 0.6.7")
 end
