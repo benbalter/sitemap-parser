@@ -2,9 +2,5 @@
 
 set -e
 
-export PATH=/usr/share/rbenv/shims:$PATH RBENV_VERSION=$(cat .ruby-version)
-script/bootstrap
-
 bundle exec rake test
-
 bundle exec gem build sitemap-parser.gemspec
