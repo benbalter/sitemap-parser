@@ -41,7 +41,7 @@ class TestSitemapParser < Test::Unit::TestCase
     url = "https://raw.githubusercontent.com/benbalter/sitemap-parser/master/test/fixtures/malformed_sitemap.xml"
     sitemap = SitemapParser.new url
     assert_nothing_raised do
-      assert_equal nil, sitemap.to_a
+      assert_equal [], sitemap.to_a
     end
   end
 end
