@@ -2,6 +2,8 @@
 
 *Ruby Gem to parse sitemaps.org compliant sitemaps*
 
+[![Build Status](https://travis-ci.org/benbalter/sitemap-parser.svg?branch=master)](https://travis-ci.org/benbalter/sitemap-parser) [![Gem Version](https://badge.fury.io/rb/sitemap-parser.svg)](http://badge.fury.io/rb/sitemap-parser)
+
 ## Usage
 
 ```ruby
