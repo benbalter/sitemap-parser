@@ -50,7 +50,7 @@ class SitemapParser
   end
 
   def sitemaps
-    sitemap.at("sitemapindex").search("url")
+    sitemap.at("sitemapindex").search("sitemap")
   rescue
     nil
   end
