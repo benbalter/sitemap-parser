@@ -48,4 +48,17 @@ class SitemapParser
   rescue
     []
   end
+
+  def sitemaps
+    sitemap.at("sitemapindex").search("url")
+  rescue
+    nil
+  end
+
+  def sitemap_url_array
+    sitemaps.map { |url| url.at("loc").content }
+  rescue
+    []
+  end
+
 end
