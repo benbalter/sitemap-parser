@@ -44,4 +44,12 @@ class TestSitemapParser < Test::Unit::TestCase
       assert_equal [], sitemap.to_a
     end
   end
+
+  def test_gz_sitemap
+    gz_url = "https://raw.githubusercontent.com/adamolien/sitemap-parser/master/test/fixtures/malformed_sitemap.xml"
+    gz_sitemap = SitemapParser.new gz_url
+    assert_nothing_raised do
+      assert_equal @sitemap.to_a, gz_sitemap.to_a
+    end
+  end
 end

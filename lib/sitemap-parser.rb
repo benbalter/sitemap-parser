@@ -14,7 +14,12 @@ class SitemapParser
         request = Typhoeus::Request.new(@url, followlocation: @options[:followlocation])
         request.on_complete do |response|
           if response.success?
-            return response.body
+            if @url =~ /.gz$/
+              gz = Zlib::GzipReader.new(StringIO.new(response.body.to_s))
+              return gz.read
+            else
+              return response.body
+            end
           else
             return nil
           end
