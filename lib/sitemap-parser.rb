@@ -39,7 +39,9 @@ class SitemapParser
 
   def urls
     urlset = sitemap.at("urlset")
-    (urlset.nil? ? Nokogiri::XML::NodeSet.new(@sitemap, []) : urlset.search("url"))
+    urlset.search("url")
+    rescue 
+      nil
   end
 
   def all_urls 
@@ -49,6 +51,8 @@ class SitemapParser
 
   def to_a
     all_urls.reduce([]){|memo, urlset| memo += urlset.map{|url| url.at("loc").content } }
+    rescue 
+      []
   end
 
   def sitemaps
