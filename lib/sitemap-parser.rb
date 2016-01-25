@@ -46,7 +46,7 @@ class SitemapParser
 
   def all_urls 
     # includes URLs from other sub-sitemaps referenced via <sitemapindex>
-    (@options[:recurse] ? sitemap_index_urls : []) << urls
+    (@options[:recurse] ? sitemap_index_urls : []) << (urls || [])
   end
 
   def to_a
@@ -69,7 +69,7 @@ class SitemapParser
 
   def sitemap_index_urls
     sitemap_url_array.map do |sitemap_url|
-      STDERR.puts("recursively going to #{sitemap_url} from index")
+      # STDERR.puts("recursively going to #{sitemap_url} from index")
       self.class.new(sitemap_url, :recurse => false).urls # only recurse one-level down, to avoid infinite recursion
     end
   end
