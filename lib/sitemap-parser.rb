@@ -4,7 +4,7 @@ require 'typhoeus'
 class SitemapParser
 
   def initialize(url, opts = {})
-    @url = url
+    @url = url.match(/^http/) ? url : "http://#{url}"
     @options = {:followlocation => true, :recurse => true}.merge(opts)
   end
 
