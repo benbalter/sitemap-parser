@@ -12,6 +12,10 @@ sitemap.urls # => Array of Nokigiri XML::Node objects
 sitemap.to_a # => Array of url strings
 ```
 
-## Roadmap
+## Options
 
-* `sitemap_index` support
+```ruby
+sitemap = SitemapParser.new "http://ben.balter.com/sitemap.xml", 
+  :recurse => true // traverse one-level of sitemapindex tags and add their URLs to the output
+  :followlocation => true // follow redirects
+```

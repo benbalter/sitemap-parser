@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+	<sitemap>
+		<loc>https://raw.githubusercontent.com/benbalter/sitemap-parser/master/test/fixtures/sitemap.xml</loc>
+		<lastmod>2016-01-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1</priority>
+	</sitemap>
+  <sitemap>
+    <loc>https://raw.githubusercontent.com/benbalter/sitemap-parser/master/test/fixtures/malformed_sitemap.xml</loc>
+    <lastmod>2016-01-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </sitemap>
+</sitemapindex>
