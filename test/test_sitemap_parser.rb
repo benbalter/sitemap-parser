@@ -57,4 +57,15 @@ class TestSitemapParser < Test::Unit::TestCase
       sitemap.to_a
     end
   end
+
+  def test_malformed_sitemap_no_urlset
+    url = 'https://example.com/bad/sitemap.xml'
+    response = Typhoeus::Response.new(code: 200, body: '<foo>bar</foo>')
+    Typhoeus.stub(url).and_return(response)
+
+    sitemap = SitemapParser.new url
+    assert_raise_with_message RuntimeError, 'Malformed sitemap, no urlset' do
+      sitemap.to_a
+    end
+  end
 end

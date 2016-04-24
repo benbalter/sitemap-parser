@@ -31,7 +31,11 @@ class SitemapParser
   end
 
   def urls
-    sitemap.at("urlset").search("url")
+    if sitemap.at('urlset')
+      sitemap.at("urlset").search("url")
+    else
+      raise 'Malformed sitemap, no urlset'
+    end
   end
 
   def to_a
