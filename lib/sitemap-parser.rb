@@ -16,7 +16,7 @@ class SitemapParser
           if response.success?
             return response.body
           else
-            return nil
+            raise "HTTP request to #{@url} failed"
           end
         end
         request.run
@@ -28,19 +28,15 @@ class SitemapParser
 
   def sitemap
     @sitemap ||= Nokogiri::XML(raw_sitemap)
-  rescue
-    nil
   end
 
   def urls
     sitemap.at("urlset").search("url")
-  rescue
-    nil
   end
 
   def to_a
     urls.map { |url| url.at("loc").content }
-  rescue
-    []
+  rescue NoMethodError
+    raise 'Malformed sitemap, url without loc'
   end
 end
