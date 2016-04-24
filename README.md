@@ -12,6 +12,14 @@ sitemap.urls # => Array of Nokigiri XML::Node objects
 sitemap.to_a # => Array of url strings
 ```
 
+## Options
+
+### Recurse nested sitemaps
+
+```
+sitemap = SitemapParser.new('http://ben.balter.com/sitemap.xml', {recurse: true})
+```
+
 ## Roadmap
 
 * `sitemap_index` support

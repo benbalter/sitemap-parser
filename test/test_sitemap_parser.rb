@@ -68,4 +68,18 @@ class TestSitemapParser < Test::Unit::TestCase
       sitemap.to_a
     end
   end
+
+  def test_nested_sitemap
+    urls = ['https://example.com/sitemap_index.xml', 'https://example.com/sitemap.xml', 'https://example.com/sitemap2.xml']
+    urls.each do |url|
+      filename = url.gsub('https://example.com/', '')
+      file = File.join(File.dirname(__FILE__), 'fixtures', filename)
+      response = Typhoeus::Response.new(code: 200, body: File.read(file))
+      Typhoeus.stub(url).and_return(response)
+    end
+
+    sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', :recurse => true
+    assert_equal 6, sitemap.to_a.count
+    assert_equal 6, sitemap.urls.count
+  end
 end
