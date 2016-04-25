@@ -5,7 +5,7 @@ class SitemapParser
 
   def initialize(url, opts = {})
     @url = url
-    @options = {:followlocation => true}.merge(opts)
+    @options = {:followlocation => true, :recurse => false}.merge(opts)
   end
 
   def raw_sitemap
@@ -16,7 +16,7 @@ class SitemapParser
           if response.success?
             return response.body
           else
-            return nil
+            raise "HTTP request to #{@url} failed"
           end
         end
         request.run
@@ -28,19 +28,28 @@ class SitemapParser
 
   def sitemap
     @sitemap ||= Nokogiri::XML(raw_sitemap)
-  rescue
-    nil
   end
 
   def urls
-    sitemap.at("urlset").search("url")
-  rescue
-    nil
+    if sitemap.at('urlset')
+      sitemap.at("urlset").search("url")
+    elsif sitemap.at('sitemapindex')
+      found_urls = []
+      if @options[:recurse]
+        sitemap.at('sitemapindex').search('sitemap').each do |sitemap|
+          child_sitemap_location = sitemap.at('loc').content
+          found_urls << self.class.new(child_sitemap_location, :recurse => false).urls
+        end
+      end
+      return found_urls.flatten
+    else
+      raise 'Malformed sitemap, no urlset'
+    end
   end
 
   def to_a
     urls.map { |url| url.at("loc").content }
-  rescue
-    []
+  rescue NoMethodError
+    raise 'Malformed sitemap, url without loc'
   end
 end
