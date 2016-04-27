@@ -14,4 +14,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency("shoulda", "~> 3.5")
   s.add_development_dependency("bundler", "~> 1.6")
   s.add_development_dependency("minitest", "~> 4.7")
+  s.add_development_dependency("test-unit", "~> 3.1")
 end
