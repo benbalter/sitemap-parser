@@ -53,7 +53,7 @@ class TestSitemapParser < Test::Unit::TestCase
     Typhoeus.stub(url).and_return(response)
 
     sitemap = SitemapParser.new url
-    assert_raise_with_message RuntimeError, 'Malformed sitemap, url without loc' do
+    assert_raise RuntimeError.new('Malformed sitemap, url without loc') do
       sitemap.to_a
     end
   end
