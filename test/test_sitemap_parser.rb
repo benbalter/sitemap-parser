@@ -5,7 +5,7 @@ require 'typhoeus'
 class TestSitemapParser < Test::Unit::TestCase
   def setup
     url = "https://example.com/sitemap.xml"
-    local_file = File.join(File.dirname(__FILE__), 'fixtures', 'sitemap.xml')
+    local_file = fixture_path('sitemap.xml')
 
     response = Typhoeus::Response.new(code: 200, body: File.read(local_file))
     Typhoeus.stub(url).and_return(response)
@@ -48,7 +48,7 @@ class TestSitemapParser < Test::Unit::TestCase
 
   def test_malformed_sitemap
     url = 'https://example.com/bad/sitemap.xml'
-    malformed_sitemap = File.join(File.dirname(__FILE__), 'fixtures', 'malformed_sitemap.xml')
+    malformed_sitemap = fixture_path('malformed_sitemap.xml')
     response = Typhoeus::Response.new(code: 200, body: File.read(malformed_sitemap))
     Typhoeus.stub(url).and_return(response)
 
@@ -73,7 +73,7 @@ class TestSitemapParser < Test::Unit::TestCase
     urls = ['https://example.com/sitemap_index.xml', 'https://example.com/sitemap.xml', 'https://example.com/sitemap2.xml']
     urls.each do |url|
       filename = url.gsub('https://example.com/', '')
-      file = File.join(File.dirname(__FILE__), 'fixtures', filename)
+      file = fixture_path(filename)
       response = Typhoeus::Response.new(code: 200, body: File.read(file))
       Typhoeus.stub(url).and_return(response)
     end
@@ -81,5 +81,10 @@ class TestSitemapParser < Test::Unit::TestCase
     sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', :recurse => true
     assert_equal 6, sitemap.to_a.count
     assert_equal 6, sitemap.urls.count
+  end
+  private
+
+  def fixture_path(name)
+    File.join(__dir__, 'fixtures', name)
   end
 end
