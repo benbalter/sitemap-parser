@@ -1,6 +1,8 @@
 require 'nokogiri'
 require 'typhoeus'
 
+require 'zlib'
+
 class SitemapParser
 
   def initialize(url, opts = {})
@@ -14,7 +16,7 @@ class SitemapParser
         request = Typhoeus::Request.new(@url, followlocation: @options[:followlocation])
         request.on_complete do |response|
           raise "HTTP request to #{@url} failed" unless response.success?
-          return response.body
+          return inflate_body_if_needed(response)
         end
         request.run
       elsif File.exist?(@url) && @url =~ /[\\\/]sitemap\.xml\Z/i
@@ -48,5 +50,15 @@ class SitemapParser
     urls.map { |url| url.at("loc").content }
   rescue NoMethodError
     raise 'Malformed sitemap, url without loc'
+  end
+
+  private
+
+  def inflate_body_if_needed(response)
+    if response.headers["Content-Type"] == "application/gzip"
+      Zlib::Inflate.inflate(response.body)
+    else
+      response.body
+    end
   end
 end
