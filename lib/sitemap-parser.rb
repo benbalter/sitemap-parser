@@ -13,11 +13,8 @@ class SitemapParser
       if @url =~ /\Ahttp/i
         request = Typhoeus::Request.new(@url, followlocation: @options[:followlocation])
         request.on_complete do |response|
-          if response.success?
-            return response.body
-          else
-            raise "HTTP request to #{@url} failed"
-          end
+          raise "HTTP request to #{@url} failed" unless response.success?
+          return response.body
         end
         request.run
       elsif File.exist?(@url) && @url =~ /[\\\/]sitemap\.xml\Z/i
