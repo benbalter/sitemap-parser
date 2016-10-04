@@ -55,7 +55,9 @@ class SitemapParser
   private
 
   def inflate_body_if_needed(response)
-    if response.headers["Content-Type"] == "application/gzip"
+    return response.body unless response.headers
+    case response.headers["Content-Type"]
+    when /application\/gzip/, /application\/octet-stream/
       Zlib::Inflate.inflate(response.body)
     else
       response.body
