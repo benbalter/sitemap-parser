@@ -20,7 +20,7 @@ class SitemapParser
           end
         end
         request.run
-      elsif File.exist?(@url) && @url =~ /[\\\/]sitemap\.xml\Z/i
+      elsif File.exist?(@url)
         open(@url) { |f| f.read }
       end
     end

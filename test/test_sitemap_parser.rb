@@ -82,4 +82,11 @@ class TestSitemapParser < Test::Unit::TestCase
     assert_equal 6, sitemap.to_a.count
     assert_equal 6, sitemap.urls.count
   end
+
+  def test_local_sitemap
+    sitemap = SitemapParser.new File.join(File.dirname(__FILE__), 'fixtures', 'local_sitemap.xml')
+
+    assert_equal 3, sitemap.to_a.count
+    assert_equal 3, sitemap.urls.count
+  end
 end
