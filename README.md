@@ -20,6 +20,12 @@ sitemap.to_a # => Array of url strings
 sitemap = SitemapParser.new('http://ben.balter.com/sitemap.xml', {recurse: true})
 ```
 
+### HTTP Basic Auth
+
+```
+sitemap = SitemapParser.new('http://ben.balter.com/sitemap.xml', { userpwd: "username:password" })
+```
+
 ## Roadmap
 
 * `sitemap_index` support
