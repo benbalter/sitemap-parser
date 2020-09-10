@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 require File.join(File.dirname(__FILE__), 'helper')
 
 require 'typhoeus'
 
 class TestSitemapParser < Test::Unit::TestCase
   def setup
-    url = "https://example.com/sitemap.xml"
+    url = 'https://example.com/sitemap.xml'
     local_file = fixture_path('sitemap.xml')
 
     response = Typhoeus::Response.new(code: 200, headers: {}, body: File.read(local_file))
@@ -18,9 +20,9 @@ class TestSitemapParser < Test::Unit::TestCase
 
   def test_array
     assert_equal Array, @sitemap.to_a.class
-    assert_equal @expected_count, @sitemap.to_a.count
+    assert_equal @expected_count, @sitemap.to_a.size
     assert_equal Array, @local_sitemap.to_a.class
-    assert_equal @expected_count, @local_sitemap.to_a.count
+    assert_equal @expected_count, @local_sitemap.to_a.size
   end
 
   def test_xml
@@ -37,7 +39,7 @@ class TestSitemapParser < Test::Unit::TestCase
 
   def test_404
     url = 'http://ben.balter.com/foo/bar/sitemap.xml'
-    response = Typhoeus::Response.new(code: 404, headers: {}, body: "404")
+    response = Typhoeus::Response.new(code: 404, headers: {}, body: '404')
     Typhoeus.stub(url).and_return(response)
 
     sitemap = SitemapParser.new url
@@ -78,8 +80,8 @@ class TestSitemapParser < Test::Unit::TestCase
       Typhoeus.stub(url).and_return(response)
     end
 
-    sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', :recurse => true
-    assert_equal 6, sitemap.to_a.count
+    sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', recurse: true
+    assert_equal 6, sitemap.to_a.size
     assert_equal 6, sitemap.urls.count
   end
 
@@ -92,12 +94,12 @@ class TestSitemapParser < Test::Unit::TestCase
       Typhoeus.stub(url).and_return(response)
     end
 
-    sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', :recurse => true, :url_regex => /sitemap2\.xml/
-    assert_equal 3, sitemap.to_a.count
+    sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', recurse: true, url_regex: /sitemap2\.xml/
+    assert_equal 3, sitemap.to_a.size
     assert_equal 3, sitemap.urls.count
   end
 
-  sub_test_case "gzip" do
+  sub_test_case 'gzip' do
     def test_gzip_sitemap
       url = 'https://example.com/sitemap.xml'
       headers = {

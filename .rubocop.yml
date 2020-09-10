@@ -1,0 +1,8 @@
+inherit_from: .rubocop_todo.yml
+
+require:
+  - rubocop-performance
+  - rubocop-minitest
+
+AllCops:
+  NewCops: enable
