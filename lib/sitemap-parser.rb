@@ -50,6 +50,23 @@ class SitemapParser
     end
   end
 
+  def full_sitemap
+    @full_sitemap ||= begin
+      full = Nokogiri::XML(File.read('./full_sitemap_template.xml'))
+      urlset = full.at('urlset')
+
+      sitemap.at('sitemapindex').search('sitemap').map do |sitemap|
+        child_sitemap_location = sitemap.at('loc').content
+        child_sitemap = self.class.new(child_sitemap_location, recurse: false).sitemap
+        child_sitemap.at('urlset').search('url').each do |url|
+          urlset.add_child(url)
+        end
+      end
+
+      full
+    end
+  end
+
   def to_a
     urls.map { |url| url.at('loc').content }
   rescue NoMethodError
