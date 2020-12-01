@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
+require File.expand_path('lib/sitemap-parser/version', __dir__)
+
 Gem::Specification.new do |s|
   s.name = 'sitemap-parser'
   s.summary = 'Ruby Gem to parse sitemaps.org compliant sitemaps'
   s.description = 'Ruby Gem to parse sitemaps.org compliant sitemaps.'
-  s.version = '0.4.0'
+  s.version = SitemapParser::VERSION
   s.authors = ['Ben Balter']
   s.email = 'ben.balter@github.com'
   s.homepage = 'https://github.com/benbalter/sitemap-parser'
