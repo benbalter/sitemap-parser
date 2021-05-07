@@ -3,7 +3,6 @@
 require 'nokogiri'
 require 'typhoeus'
 require 'zlib'
-require_relative 'sitemap-parser/version'
 
 class SitemapParser
   def initialize(url, opts = {})
