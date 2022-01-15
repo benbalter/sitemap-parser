@@ -35,10 +35,6 @@ class SitemapParser
               elsif sitemapindex
                 options[:recurse] ? parse_sitemap_index : []
               else
-                puts sitemapindex.inspect
-                puts remote_sitemap?.inspect
-                puts url.inspect
-
                 raise 'Malformed sitemap, no urlset or sitemapindex'
               end
   end
