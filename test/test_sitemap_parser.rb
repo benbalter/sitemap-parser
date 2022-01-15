@@ -100,7 +100,7 @@ class TestSitemapParser < Test::Unit::TestCase
   end
 
   def test_nested_sitemap_with_whitespace
-    urls = ['https://example.com/sitemap_index_whitespace.xml', 'https://example.com/sitemap.xml', 'https://example.com/sitemap2.xml']
+    urls = ['https://example.com/whitespace_sitemap_index.xml', 'https://example.com/sitemap.xml', 'https://example.com/sitemap2.xml']
     urls.each do |url|
       filename = url.gsub('https://example.com/', '')
       file = fixture_path(filename)
@@ -108,7 +108,7 @@ class TestSitemapParser < Test::Unit::TestCase
       Typhoeus.stub(url).and_return(response)
     end
 
-    sitemap = SitemapParser.new 'https://example.com/sitemap_index_whitespace.xml', recurse: true
+    sitemap = SitemapParser.new 'https://example.com/whitespace_sitemap_index.xml', recurse: true
     assert_equal 6, sitemap.to_a.size
     assert_equal 6, sitemap.urls.count
   end

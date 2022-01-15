@@ -35,6 +35,10 @@ class SitemapParser
               elsif sitemapindex
                 options[:recurse] ? parse_sitemap_index : []
               else
+                puts sitemapindex.inspect
+                puts remote_sitemap?.inspect
+                puts url.inspect
+
                 raise 'Malformed sitemap, no urlset or sitemapindex'
               end
   end
@@ -68,10 +72,19 @@ class SitemapParser
     @sitemapindex ||= sitemap.at('sitemapindex')
   end
 
+  def strip_whitespace(urls)
+    urls.each do |url|
+      url.at('loc').content = url.at('loc').content.strip
+    end
+
+    urls
+  end
+
   def filter_sitemap_urls(urls)
+    urls = strip_whitespace(urls)
     return urls if options[:url_regex].nil?
 
-    urls.select { |url| url.at('loc').content.strip =~ options[:url_regex] }
+    urls.select { |url| url.at('loc').content =~ options[:url_regex] }
   end
 
   def inflate_body_if_needed(response)
@@ -82,11 +95,11 @@ class SitemapParser
   end
 
   def remote_sitemap?
-    /\Ahttp/i.match?(url)
+    %r{\Ahttps?://}i.match?(url)
   end
 
   def local_sitemap?
-    File.exist?(url) && url =~ %r{[\\/]sitemap\.xml\Z}i
+    File.exist?(url) && url =~ %r{[\\/]sitemap(_index)?\.xml\Z}i
   end
 
   def fetch_remote_sitemap
