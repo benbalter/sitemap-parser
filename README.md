@@ -37,7 +37,3 @@ sitemap = SitemapParser.new('http://ben.balter.com/sitemap.xml', {recurse: true,
 ```ruby
 sitemap = SitemapParser.new('http://ben.balter.com/sitemap.xml', { userpwd: "username:password" })
 ```
-
-## Roadmap
-
-* `sitemap_index` support

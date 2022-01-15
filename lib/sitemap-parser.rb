@@ -6,26 +6,23 @@ require 'zlib'
 require_relative 'sitemap-parser/version'
 
 class SitemapParser
+  attr_accessor :url, :options
+
+  DEFAULT_OPTIONS = {
+    followlocation: true,
+    recurse: false,
+    url_regex: nil
+  }.freeze
+
+  DEFLATE_TYPE_REGEX = %r{application/((x-)?gzip|octet-stream)}.freeze
+
   def initialize(url, opts = {})
     @url = url
-    @options = { followlocation: true, recurse: false, url_regex: nil }.merge(opts)
+    @options = DEFAULT_OPTIONS.merge(opts)
   end
 
   def raw_sitemap
-    @raw_sitemap ||= begin
-      if /\Ahttp/i.match?(@url)
-        request_options = @options.dup.tap { |opts| opts.delete(:recurse); opts.delete(:url_regex) }
-        request = Typhoeus::Request.new(@url, request_options)
-        request.on_complete do |response|
-          raise "HTTP request to #{@url} failed" unless response.success?
-
-          return inflate_body_if_needed(response)
-        end
-        request.run
-      elsif File.exist?(@url) && @url =~ %r{[\\/]sitemap\.xml\Z}i
-        File.open(@url, &:read)
-      end
-    end
+    @raw_sitemap ||= fetch_remote_sitemap || read_local_sitemap
   end
 
   def sitemap
@@ -33,21 +30,13 @@ class SitemapParser
   end
 
   def urls
-    if sitemap.at('urlset')
-      filter_sitemap_urls(sitemap.at('urlset').search('url'))
-    elsif sitemap.at('sitemapindex')
-      found_urls = []
-      if @options[:recurse]
-        urls = sitemap.at('sitemapindex').search('sitemap')
-        filter_sitemap_urls(urls).each do |sitemap|
-          child_sitemap_location = sitemap.at('loc').content
-          found_urls << self.class.new(child_sitemap_location, recurse: false).urls
-        end
-      end
-      found_urls.flatten
-    else
-      raise 'Malformed sitemap, no urlset'
-    end
+    @urls ||= if urlset
+                filter_sitemap_urls(urlset.search('url'))
+              elsif sitemapindex
+                options[:recurse] ? parse_sitemap_index : []
+              else
+                raise 'Malformed sitemap, no urlset or sitemapindex'
+              end
   end
 
   def to_a
@@ -58,20 +47,63 @@ class SitemapParser
 
   private
 
-  def filter_sitemap_urls(urls)
-    return urls if @options[:url_regex].nil?
+  def parse_sitemap_index
+    found_urls = []
 
-    urls.select { |url| url.at('loc').content.strip =~ @options[:url_regex] }
+    urls = sitemapindex.search('sitemap')
+    urls = filter_sitemap_urls(urls)
+    urls.each do |sitemap|
+      child_sitemap_location = sitemap.at('loc').content
+      found_urls << self.class.new(child_sitemap_location, recurse: false).urls
+    end
+
+    found_urls.flatten
+  end
+
+  def urlset
+    @urlset ||= sitemap.at('urlset')
+  end
+
+  def sitemapindex
+    @sitemapindex ||= sitemap.at('sitemapindex')
+  end
+
+  def filter_sitemap_urls(urls)
+    return urls if options[:url_regex].nil?
+
+    urls.select { |url| url.at('loc').content.strip =~ options[:url_regex] }
   end
 
   def inflate_body_if_needed(response)
     return response.body unless response.headers
+    return response.body unless DEFLATE_TYPE_REGEX.match?(response.headers['Content-type'])
 
-    case response.headers['Content-Type']
-    when %r{application/gzip}, %r{application/x-gzip}, %r{application/octet-stream}
-      Zlib.gunzip(response.body)
-    else
-      response.body
-    end
+    Zlib.gunzip(response.body)
+  end
+
+  def remote_sitemap?
+    /\Ahttp/i.match?(url)
+  end
+
+  def local_sitemap?
+    File.exist?(url) && url =~ %r{[\\/]sitemap\.xml\Z}i
+  end
+
+  def fetch_remote_sitemap
+    return nil unless remote_sitemap?
+
+    request_options = options.dup.tap { |opts| opts.delete(:recurse); opts.delete(:url_regex) }
+    request = Typhoeus::Request.new(url, request_options)
+
+    response = request.run
+    raise "HTTP request to #{url} failed" unless response.success?
+
+    inflate_body_if_needed(response)
+  end
+
+  def read_local_sitemap
+    return nil unless local_sitemap?
+
+    File.open(url, &:read)
   end
 end

@@ -66,7 +66,7 @@ class TestSitemapParser < Test::Unit::TestCase
     Typhoeus.stub(url).and_return(response)
 
     sitemap = SitemapParser.new url
-    assert_raise RuntimeError.new('Malformed sitemap, no urlset') do
+    assert_raise RuntimeError.new('Malformed sitemap, no urlset or sitemapindex') do
       sitemap.to_a
     end
   end
@@ -97,6 +97,20 @@ class TestSitemapParser < Test::Unit::TestCase
     sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', recurse: true, url_regex: /sitemap2\.xml/
     assert_equal 3, sitemap.to_a.size
     assert_equal 3, sitemap.urls.count
+  end
+
+  def test_nested_sitemap_with_whitespace
+    urls = ['https://example.com/sitemap_index_whitespace.xml', 'https://example.com/sitemap.xml', 'https://example.com/sitemap2.xml']
+    urls.each do |url|
+      filename = url.gsub('https://example.com/', '')
+      file = fixture_path(filename)
+      response = Typhoeus::Response.new(code: 200, headers: {}, body: File.read(file))
+      Typhoeus.stub(url).and_return(response)
+    end
+
+    sitemap = SitemapParser.new 'https://example.com/sitemap_index_whitespace.xml', recurse: true
+    assert_equal 6, sitemap.to_a.size
+    assert_equal 6, sitemap.urls.count
   end
 
   sub_test_case 'gzip' do
