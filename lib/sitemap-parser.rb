@@ -54,7 +54,7 @@ class SitemapParser
     urls = filter_sitemap_urls(urls)
     urls.each do |sitemap|
       child_sitemap_location = sitemap.at('loc').content
-      found_urls << self.class.new(child_sitemap_location, recurse: false).urls
+      found_urls << self.class.new(child_sitemap_location, recurse: @options[:recurse]).urls
     end
 
     found_urls.flatten
