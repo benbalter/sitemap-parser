@@ -1,6 +1,0 @@
-langauage: ruby
-script: "script/cibuild"
-sudo: false
-cache: bundler
-rvm:
-  - 2.1.0
