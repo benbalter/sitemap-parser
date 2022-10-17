@@ -85,6 +85,27 @@ class TestSitemapParser < Test::Unit::TestCase
     assert_equal 6, sitemap.urls.count
   end
 
+  def test_multiple_nested_sitemaps
+    urls = ['https://example.com/nested_sitemap_index.xml',
+            'https://example.com/nested_sitemap_index1.xml',
+            'https://example.com/nested_sitemap_index2.xml',
+            'https://example.com/nested_sitemap_index3.xml',
+            'https://example.com/nested_sitemap_index4.xml',
+            'https://example.com/nested_sitemap_index5.xml',
+            'https://example.com/nested_sitemap_index6.xml']
+
+    urls.each do |url|
+      filename = url.gsub('https://example.com/', '')
+      file = fixture_path(filename)
+      response = Typhoeus::Response.new(code: 200, headers: {}, body: File.read(file))
+      Typhoeus.stub(url).and_return(response)
+    end
+
+    sitemap = SitemapParser.new 'https://example.com/nested_sitemap_index.xml', recurse: true
+    assert_equal 12, sitemap.to_a.size
+    assert_equal 12, sitemap.urls.count
+  end
+
   def test_nested_sitemap_with_regex
     urls = ['https://example.com/sitemap_index.xml', 'https://example.com/sitemap.xml', 'https://example.com/sitemap2.xml']
     urls.each do |url|
