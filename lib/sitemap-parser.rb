@@ -54,7 +54,7 @@ class SitemapParser
     urls = filter_sitemap_urls(urls)
     urls.each do |sitemap|
       child_sitemap_location = sitemap.at('loc').content
-      found_urls << self.class.new(child_sitemap_location, recurse: @options[:recurse]).urls
+      found_urls << self.class.new(child_sitemap_location, @options).urls
     end
 
     found_urls.flatten
@@ -105,7 +105,7 @@ class SitemapParser
     request = Typhoeus::Request.new(url, request_options)
 
     response = request.run
-    raise "HTTP request to #{url} failed" unless response.success?
+    raise "HTTP request to #{url} failed with status #{response.code}" unless response.success?
 
     inflate_body_if_needed(response)
   end
