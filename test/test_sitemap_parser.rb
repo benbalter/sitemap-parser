@@ -43,7 +43,18 @@ class TestSitemapParser < Test::Unit::TestCase
     Typhoeus.stub(url).and_return(response)
 
     sitemap = SitemapParser.new url
-    assert_raise RuntimeError.new("HTTP request to #{url} failed") do
+    assert_raise RuntimeError.new("HTTP request to #{url} failed with status 404") do
+      sitemap.urls
+    end
+  end
+
+  def test_403
+    url = 'http://ben.balter.com/foo/bar/sitemap.xml'
+    response = Typhoeus::Response.new(code: 403, headers: {}, body: '403')
+    Typhoeus.stub(url).and_return(response)
+
+    sitemap = SitemapParser.new url
+    assert_raise RuntimeError.new("HTTP request to #{url} failed with status 403") do
       sitemap.urls
     end
   end
@@ -81,6 +92,7 @@ class TestSitemapParser < Test::Unit::TestCase
     end
 
     sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', recurse: true
+
     assert_equal 6, sitemap.to_a.size
     assert_equal 6, sitemap.urls.count
   end
@@ -102,6 +114,7 @@ class TestSitemapParser < Test::Unit::TestCase
     end
 
     sitemap = SitemapParser.new 'https://example.com/nested_sitemap_index.xml', recurse: true
+
     assert_equal 12, sitemap.to_a.size
     assert_equal 12, sitemap.urls.count
   end
@@ -115,7 +128,8 @@ class TestSitemapParser < Test::Unit::TestCase
       Typhoeus.stub(url).and_return(response)
     end
 
-    sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', recurse: true, url_regex: /sitemap2\.xml/
+    sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', recurse: true, url_regex: /sitemap2/
+
     assert_equal 3, sitemap.to_a.size
     assert_equal 3, sitemap.urls.count
   end
@@ -130,6 +144,7 @@ class TestSitemapParser < Test::Unit::TestCase
     end
 
     sitemap = SitemapParser.new 'https://example.com/whitespace_sitemap_index.xml', recurse: true
+
     assert_equal 6, sitemap.to_a.size
     assert_equal 6, sitemap.urls.count
   end
@@ -145,6 +160,7 @@ class TestSitemapParser < Test::Unit::TestCase
 
       sitemap = SitemapParser.new url
       expected = ['http://ben.balter.com/', 'http://ben.balter.com/about/', 'http://ben.balter.com/contact/']
+
       assert_equal(expected, sitemap.to_a)
     end
   end
