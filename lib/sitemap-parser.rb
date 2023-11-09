@@ -102,10 +102,11 @@ class SitemapParser
     return nil unless remote_sitemap?
 
     request_options = options.dup.tap { |opts| opts.delete(:recurse); opts.delete(:url_regex) }
+    request_options[:headers] = { 'User-Agent' => 'Sitemap-Parser' }
     request = Typhoeus::Request.new(url, request_options)
 
     response = request.run
-    raise "HTTP request to #{url} failed" unless response.success?
+    raise "HTTP request to #{url} failed with code #{response.code}." unless response.success?
 
     inflate_body_if_needed(response)
   end

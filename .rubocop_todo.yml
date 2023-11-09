@@ -17,6 +17,8 @@ Gemspec/RequiredRubyVersion:
 # Configuration parameters: CountComments, CountAsOne.
 Metrics/ClassLength:
   Max: 124
+  Exclude:
+    - 'test/**/*'
 
 # Offense count: 1
 # Configuration parameters: CountComments, CountAsOne, ExcludedMethods.
