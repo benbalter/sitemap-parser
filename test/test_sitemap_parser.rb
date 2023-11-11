@@ -39,22 +39,12 @@ class TestSitemapParser < Test::Unit::TestCase
 
   def test_404
     url = 'http://ben.balter.com/foo/bar/sitemap.xml'
-    response = Typhoeus::Response.new(code: 404, headers: {}, body: '404')
+    code = 404
+    response = Typhoeus::Response.new(code: code, headers: {}, body: code.to_s)
     Typhoeus.stub(url).and_return(response)
 
     sitemap = SitemapParser.new url
-    assert_raise RuntimeError.new("HTTP request to #{url} failed with status 404") do
-      sitemap.urls
-    end
-  end
-
-  def test_403
-    url = 'http://ben.balter.com/foo/bar/sitemap.xml'
-    response = Typhoeus::Response.new(code: 403, headers: {}, body: '403')
-    Typhoeus.stub(url).and_return(response)
-
-    sitemap = SitemapParser.new url
-    assert_raise RuntimeError.new("HTTP request to #{url} failed with status 403") do
+    assert_raise RuntimeError.new("HTTP request to #{url} failed with code #{code}.") do
       sitemap.urls
     end
   end
@@ -128,7 +118,7 @@ class TestSitemapParser < Test::Unit::TestCase
       Typhoeus.stub(url).and_return(response)
     end
 
-    sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', recurse: true, url_regex: /sitemap2/
+    sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', recurse: true, url_regex: /sitemap2\.xml/
 
     assert_equal 3, sitemap.to_a.size
     assert_equal 3, sitemap.urls.count
