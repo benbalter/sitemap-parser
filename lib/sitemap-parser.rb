@@ -102,7 +102,9 @@ class SitemapParser
     return nil unless remote_sitemap?
 
     request_options = options.dup.tap { |opts| opts.delete(:recurse); opts.delete(:url_regex) }
-    request_options[:headers] = { 'User-Agent' => 'Sitemap-Parser' } unless options[:headers] && options[:headers]['User-Agent']
+    unless options[:headers] && options[:headers]['User-Agent']
+      request_options[:headers] = { 'User-Agent' => 'Sitemap-Parser' }
+    end
     request = Typhoeus::Request.new(url, request_options)
 
     response = request.run
