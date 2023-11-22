@@ -34,6 +34,8 @@ class SitemapParser
                 filter_sitemap_urls(urlset.search('url'))
               elsif sitemapindex
                 options[:recurse] ? parse_sitemap_index : []
+              elsif raw_sitemap.strip.empty?
+                []
               else
                 raise 'Malformed sitemap, no urlset or sitemapindex'
               end
