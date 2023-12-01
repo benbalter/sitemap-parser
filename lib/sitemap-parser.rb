@@ -97,7 +97,7 @@ class SitemapParser
   end
 
   def local_sitemap?
-    File.exist?(url) && url =~ %r{[\\/]sitemap(_index)?\.xml\Z}i
+    File.exist?(url)
   end
 
   def fetch_remote_sitemap
