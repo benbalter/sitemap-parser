@@ -118,7 +118,7 @@ class TestSitemapParser < Test::Unit::TestCase
       Typhoeus.stub(url).and_return(response)
     end
 
-    sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', recurse: true, url_regex: /sitemap2\.xml/
+    sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', recurse: true, url_regex: /sitemap2/
 
     assert_equal 3, sitemap.to_a.size
     assert_equal 3, sitemap.urls.count
