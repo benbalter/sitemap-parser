@@ -34,6 +34,8 @@ class SitemapParser
                 filter_sitemap_urls(urlset.search('url'))
               elsif sitemapindex
                 options[:recurse] ? parse_sitemap_index : []
+              elsif raw_sitemap.strip.empty?
+                []
               else
                 raise 'Malformed sitemap, no urlset or sitemapindex'
               end
@@ -95,14 +97,16 @@ class SitemapParser
   end
 
   def local_sitemap?
-    File.exist?(url) && url =~ %r{[\\/]sitemap(_index)?\.xml\Z}i
+    File.exist?(url)
   end
 
   def fetch_remote_sitemap
     return nil unless remote_sitemap?
 
     request_options = options.dup.tap { |opts| opts.delete(:recurse); opts.delete(:url_regex) }
-    request_options[:headers] = { 'User-Agent' => 'Sitemap-Parser' }
+    unless options[:headers] && options[:headers]['User-Agent']
+      request_options[:headers] = { 'User-Agent' => 'Sitemap-Parser' }
+    end
     request = Typhoeus::Request.new(url, request_options)
 
     response = request.run
