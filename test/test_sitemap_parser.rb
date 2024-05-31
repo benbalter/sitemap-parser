@@ -155,6 +155,22 @@ class TestSitemapParser < Test::Unit::TestCase
     end
   end
 
+  sub_test_case 'merged' do
+    def test_full_sitemap
+      urls = ['https://example.com/sitemap_index.xml', 'https://example.com/sitemap.xml', 'https://example.com/sitemap2.xml']
+      urls.each do |url|
+        filename = url.gsub('https://example.com/', '')
+        file = fixture_path(filename)
+        response = Typhoeus::Response.new(code: 200, headers: {}, body: File.read(file))
+        Typhoeus.stub(url).and_return(response)
+      end
+
+      sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', recurse: true
+      assert_equal Nokogiri::XML::Document, sitemap.full_sitemap.class
+      assert_equal 6, sitemap.full_sitemap.search("url").count
+    end
+  end
+
   private
 
   def fixture_path(name)
