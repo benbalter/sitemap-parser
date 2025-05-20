@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 require 'nokogiri'
-require 'typhoeus'
+require 'net/http'
+require 'uri'
 require 'zlib'
 require_relative 'sitemap-parser/version'
 
@@ -86,8 +87,9 @@ class SitemapParser
   end
 
   def inflate_body_if_needed(response)
-    return response.body unless response.headers
-    return response.body unless DEFLATE_TYPE_REGEX.match?(response.headers['Content-type'])
+    content_type = response['Content-Type'] || response['content-type']
+    return response.body unless content_type
+    return response.body unless DEFLATE_TYPE_REGEX.match?(content_type)
 
     Zlib.gunzip(response.body)
   end
@@ -103,16 +105,58 @@ class SitemapParser
   def fetch_remote_sitemap
     return nil unless remote_sitemap?
 
+    uri = URI.parse(url)
+    max_redirects = 10
+    redirect_count = 0
+    
     request_options = options.dup.tap { |opts| opts.delete(:recurse); opts.delete(:url_regex) }
-    unless options[:headers] && options[:headers]['User-Agent']
-      request_options[:headers] = { 'User-Agent' => 'Sitemap-Parser' }
+    
+    # Set up default headers if not provided
+    headers = if options[:headers]
+                options[:headers]
+              else
+                { 'User-Agent' => 'Sitemap-Parser' }
+              end
+
+    while redirect_count < max_redirects
+      response = fetch_with_net_http(uri, headers, request_options)
+      
+      case response
+      when Net::HTTPSuccess
+        return inflate_body_if_needed(response)
+      when Net::HTTPRedirection
+        location = response['location']
+        uri = URI.parse(location)
+        redirect_count += 1
+      else
+        raise "HTTP request to #{url} failed with code #{response.code}."
+      end
     end
-    request = Typhoeus::Request.new(url, request_options)
+    
+    raise "HTTP request to #{url} failed: too many redirects."
+  end
 
-    response = request.run
-    raise "HTTP request to #{url} failed with code #{response.code}." unless response.success?
+  def fetch_with_net_http(uri, headers, request_options)
+    http = Net::HTTP.new(uri.host, uri.port)
+    
+    # Set up SSL if HTTPS
+    if uri.scheme == 'https'
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    end
+    
+    # Set timeout if specified in options
+    http.open_timeout = request_options[:timeout] if request_options[:timeout]
+    http.read_timeout = request_options[:timeout] if request_options[:timeout]
+    
+    request = Net::HTTP::Get.new(uri.request_uri)
+    
+    # Add headers to request
+    headers.each do |key, value|
+      request[key] = value
+    end
 
-    inflate_body_if_needed(response)
+    http.request(request)
   end
 
   def read_local_sitemap

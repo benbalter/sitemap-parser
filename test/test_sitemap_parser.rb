@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 require File.join(File.dirname(__FILE__), 'helper')
-
-require 'typhoeus'
+require 'webmock/test_unit'
 
 class TestSitemapParser < Test::Unit::TestCase
   def setup
     url = 'https://example.com/sitemap.xml'
     local_file = fixture_path('sitemap.xml')
 
-    response = Typhoeus::Response.new(code: 200, headers: {}, body: File.read(local_file))
-    Typhoeus.stub(url).and_return(response)
+    # Stub HTTP request using WebMock
+    stub_request(:get, url)
+      .to_return(status: 200, body: File.read(local_file), headers: {})
 
     @sitemap = SitemapParser.new url
     @local_sitemap = SitemapParser.new local_file
@@ -40,8 +40,9 @@ class TestSitemapParser < Test::Unit::TestCase
   def test_404
     url = 'http://ben.balter.com/foo/bar/sitemap.xml'
     code = 404
-    response = Typhoeus::Response.new(code: code, headers: {}, body: code.to_s)
-    Typhoeus.stub(url).and_return(response)
+    
+    stub_request(:get, url)
+      .to_return(status: code, body: code.to_s, headers: {})
 
     sitemap = SitemapParser.new url
     assert_raise RuntimeError.new("HTTP request to #{url} failed with code #{code}.") do
@@ -52,8 +53,9 @@ class TestSitemapParser < Test::Unit::TestCase
   def test_malformed_sitemap
     url = 'https://example.com/bad/sitemap.xml'
     malformed_sitemap = fixture_path('malformed_sitemap.xml')
-    response = Typhoeus::Response.new(code: 200, headers: {}, body: File.read(malformed_sitemap))
-    Typhoeus.stub(url).and_return(response)
+    
+    stub_request(:get, url)
+      .to_return(status: 200, body: File.read(malformed_sitemap), headers: {})
 
     sitemap = SitemapParser.new url
     assert_raise RuntimeError.new('Malformed sitemap, url without loc') do
@@ -63,8 +65,9 @@ class TestSitemapParser < Test::Unit::TestCase
 
   def test_malformed_sitemap_no_urlset
     url = 'https://example.com/bad/sitemap.xml'
-    response = Typhoeus::Response.new(code: 200, headers: {}, body: '<foo>bar</foo>')
-    Typhoeus.stub(url).and_return(response)
+    
+    stub_request(:get, url)
+      .to_return(status: 200, body: '<foo>bar</foo>', headers: {})
 
     sitemap = SitemapParser.new url
     assert_raise RuntimeError.new('Malformed sitemap, no urlset or sitemapindex') do
@@ -77,8 +80,9 @@ class TestSitemapParser < Test::Unit::TestCase
     urls.each do |url|
       filename = url.gsub('https://example.com/', '')
       file = fixture_path(filename)
-      response = Typhoeus::Response.new(code: 200, headers: {}, body: File.read(file))
-      Typhoeus.stub(url).and_return(response)
+      
+      stub_request(:get, url)
+        .to_return(status: 200, body: File.read(file), headers: {})
     end
 
     sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', recurse: true
@@ -99,8 +103,9 @@ class TestSitemapParser < Test::Unit::TestCase
     urls.each do |url|
       filename = url.gsub('https://example.com/', '')
       file = fixture_path(filename)
-      response = Typhoeus::Response.new(code: 200, headers: {}, body: File.read(file))
-      Typhoeus.stub(url).and_return(response)
+      
+      stub_request(:get, url)
+        .to_return(status: 200, body: File.read(file), headers: {})
     end
 
     sitemap = SitemapParser.new 'https://example.com/nested_sitemap_index.xml', recurse: true
@@ -114,8 +119,9 @@ class TestSitemapParser < Test::Unit::TestCase
     urls.each do |url|
       filename = url.gsub('https://example.com/', '')
       file = File.join(File.dirname(__FILE__), 'fixtures', filename)
-      response = Typhoeus::Response.new(code: 200, body: File.read(file))
-      Typhoeus.stub(url).and_return(response)
+      
+      stub_request(:get, url)
+        .to_return(status: 200, body: File.read(file))
     end
 
     sitemap = SitemapParser.new 'https://example.com/sitemap_index.xml', recurse: true, url_regex: /sitemap2/
@@ -129,8 +135,9 @@ class TestSitemapParser < Test::Unit::TestCase
     urls.each do |url|
       filename = url.gsub('https://example.com/', '')
       file = fixture_path(filename)
-      response = Typhoeus::Response.new(code: 200, headers: {}, body: File.read(file))
-      Typhoeus.stub(url).and_return(response)
+      
+      stub_request(:get, url)
+        .to_return(status: 200, body: File.read(file), headers: {})
     end
 
     sitemap = SitemapParser.new 'https://example.com/whitespace_sitemap_index.xml', recurse: true
@@ -142,11 +149,13 @@ class TestSitemapParser < Test::Unit::TestCase
   sub_test_case 'gzip' do
     def test_gzip_sitemap
       url = 'https://example.com/sitemap.xml'
-      headers = {
-        'Content-Type' => 'application/gzip'
-      }
-      response = Typhoeus::Response.new(code: 200, headers: headers, body: File.read(fixture_path('sitemap.xml.gz')))
-      Typhoeus.stub(url).and_return(response)
+      
+      stub_request(:get, url)
+        .to_return(
+          status: 200, 
+          body: File.read(fixture_path('sitemap.xml.gz')),
+          headers: {'Content-Type' => 'application/gzip'}
+        )
 
       sitemap = SitemapParser.new url
       expected = ['http://ben.balter.com/', 'http://ben.balter.com/about/', 'http://ben.balter.com/contact/']
