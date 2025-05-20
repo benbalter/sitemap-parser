@@ -32,8 +32,8 @@ can provide a regex that will be used to match each page.
 sitemap = SitemapParser.new('http://ben.balter.com/sitemap.xml', {recurse: true, url_regex: /sitemapregex/})
 ```
 
-### Typhoeus Options
+### HTTP Options
 
 ```ruby
-sitemap = SitemapParser.new('http://ben.balter.com/sitemap.xml', { userpwd: "username:password" })
+sitemap = SitemapParser.new('http://ben.balter.com/sitemap.xml', { headers: { 'Authorization' => 'Basic ' + Base64.strict_encode64("username:password") } })
 ```
