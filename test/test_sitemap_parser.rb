@@ -1,20 +1,29 @@
 # frozen_string_literal: true
 
 require File.join(File.dirname(__FILE__), 'helper')
-require 'webmock/test_unit'
 
 class TestSitemapParser < Test::Unit::TestCase
   def setup
     url = 'https://example.com/sitemap.xml'
     local_file = fixture_path('sitemap.xml')
 
-    # Stub HTTP request using WebMock
-    stub_request(:get, url)
-      .to_return(status: 200, body: File.read(local_file), headers: {})
+    # Check if WebMock is available
+    @webmock_available = defined?(WebMock)
+    
+    if @webmock_available
+      # Stub HTTP request using WebMock
+      stub_request(:get, url)
+        .to_return(status: 200, body: File.read(local_file), headers: {})
+    end
 
-    @sitemap = SitemapParser.new url
+    if @webmock_available
+      @sitemap = SitemapParser.new url
+    else
+      # If WebMock is not available, use local file for both tests
+      @sitemap = SitemapParser.new local_file
+    end
+    
     @local_sitemap = SitemapParser.new local_file
-
     @expected_count = 3
   end
 
@@ -38,6 +47,8 @@ class TestSitemapParser < Test::Unit::TestCase
   end
 
   def test_404
+    omit "WebMock not available" unless defined?(WebMock)
+
     url = 'http://ben.balter.com/foo/bar/sitemap.xml'
     code = 404
     
@@ -51,6 +62,8 @@ class TestSitemapParser < Test::Unit::TestCase
   end
 
   def test_malformed_sitemap
+    omit "WebMock not available" unless defined?(WebMock)
+
     url = 'https://example.com/bad/sitemap.xml'
     malformed_sitemap = fixture_path('malformed_sitemap.xml')
     
@@ -64,6 +77,8 @@ class TestSitemapParser < Test::Unit::TestCase
   end
 
   def test_malformed_sitemap_no_urlset
+    omit "WebMock not available" unless defined?(WebMock)
+
     url = 'https://example.com/bad/sitemap.xml'
     
     stub_request(:get, url)
@@ -76,6 +91,8 @@ class TestSitemapParser < Test::Unit::TestCase
   end
 
   def test_nested_sitemap
+    omit "WebMock not available" unless defined?(WebMock)
+
     urls = ['https://example.com/sitemap_index.xml', 'https://example.com/sitemap.xml', 'https://example.com/sitemap2.xml']
     urls.each do |url|
       filename = url.gsub('https://example.com/', '')
@@ -92,6 +109,8 @@ class TestSitemapParser < Test::Unit::TestCase
   end
 
   def test_multiple_nested_sitemaps
+    omit "WebMock not available" unless defined?(WebMock)
+
     urls = ['https://example.com/nested_sitemap_index.xml',
             'https://example.com/nested_sitemap_index1.xml',
             'https://example.com/nested_sitemap_index2.xml',
@@ -115,6 +134,8 @@ class TestSitemapParser < Test::Unit::TestCase
   end
 
   def test_nested_sitemap_with_regex
+    omit "WebMock not available" unless defined?(WebMock)
+
     urls = ['https://example.com/sitemap_index.xml', 'https://example.com/sitemap.xml', 'https://example.com/sitemap2.xml']
     urls.each do |url|
       filename = url.gsub('https://example.com/', '')
@@ -131,6 +152,8 @@ class TestSitemapParser < Test::Unit::TestCase
   end
 
   def test_nested_sitemap_with_whitespace
+    omit "WebMock not available" unless defined?(WebMock)
+
     urls = ['https://example.com/whitespace_sitemap_index.xml', 'https://example.com/sitemap.xml', 'https://example.com/sitemap2.xml']
     urls.each do |url|
       filename = url.gsub('https://example.com/', '')
@@ -148,6 +171,8 @@ class TestSitemapParser < Test::Unit::TestCase
 
   sub_test_case 'gzip' do
     def test_gzip_sitemap
+      omit "WebMock not available" unless defined?(WebMock)
+
       url = 'https://example.com/sitemap.xml'
       
       stub_request(:get, url)

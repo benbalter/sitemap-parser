@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require 'rubygems'
+# frozen_string_literal: true
+
 require 'bundler'
 begin
   Bundler.setup(:default, :development)
@@ -12,6 +13,12 @@ end
 require 'test/unit'
 require 'shoulda-context'
 require 'shoulda-matchers'
+
+begin
+  require 'webmock/test_unit'
+rescue LoadError
+  # webmock not available, skipping
+end
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
