@@ -4,6 +4,7 @@ require 'nokogiri'
 require 'net/http'
 require 'uri'
 require 'zlib'
+require 'stringio'
 require_relative 'sitemap-parser/version'
 
 class SitemapParser
@@ -91,7 +92,13 @@ class SitemapParser
     return response.body unless content_type
     return response.body unless DEFLATE_TYPE_REGEX.match?(content_type)
 
-    Zlib.gunzip(response.body)
+    begin
+      gz = Zlib::GzipReader.new(StringIO.new(response.body))
+      gz.read
+    rescue Zlib::Error
+      # If decompression fails, return the raw body
+      response.body
+    end
   end
 
   def remote_sitemap?
