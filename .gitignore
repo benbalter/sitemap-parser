@@ -1,4 +1,5 @@
 /vendor/gems
+vendor/bundle
 .bundle
 bin
 /*.gem
