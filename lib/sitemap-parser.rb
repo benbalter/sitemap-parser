@@ -104,15 +104,22 @@ class SitemapParser
     return nil unless remote_sitemap?
 
     request_options = options.dup.tap { |opts| opts.delete(:recurse); opts.delete(:url_regex) }
-    unless options[:headers] && options[:headers]['User-Agent']
-      request_options[:headers] = { 'User-Agent' => 'Sitemap-Parser' }
-    end
+    request_options[:headers] = request_headers
     request = Typhoeus::Request.new(url, request_options)
 
     response = request.run
     raise "HTTP request to #{url} failed with code #{response.code}." unless response.success?
 
     inflate_body_if_needed(response)
+  end
+
+  # Returns the request headers, keeping any caller-supplied headers and adding
+  # a default User-Agent only when the caller didn't provide one.
+  def request_headers
+    headers = options[:headers] || {}
+    return headers if headers['User-Agent']
+
+    headers.merge('User-Agent' => 'Sitemap-Parser')
   end
 
   def read_local_sitemap

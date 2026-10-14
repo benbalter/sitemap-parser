@@ -139,6 +139,27 @@ class TestSitemapParser < Test::Unit::TestCase
     assert_equal 6, sitemap.urls.count
   end
 
+  sub_test_case 'request headers' do
+    def test_keeps_custom_headers_and_adds_default_user_agent
+      headers = capture_request_headers('https://example.com/sitemap.xml', headers: { 'Accept-Language' => 'fr' })
+
+      assert_equal 'fr', headers['Accept-Language']
+      assert_equal 'Sitemap-Parser', headers['User-Agent']
+    end
+
+    def test_respects_caller_supplied_user_agent
+      headers = capture_request_headers('https://example.com/sitemap.xml', headers: { 'User-Agent' => 'Custom' })
+
+      assert_equal 'Custom', headers['User-Agent']
+    end
+
+    def test_adds_default_user_agent_when_no_headers_given
+      headers = capture_request_headers('https://example.com/sitemap.xml')
+
+      assert_equal 'Sitemap-Parser', headers['User-Agent']
+    end
+  end
+
   sub_test_case 'gzip' do
     def test_gzip_sitemap
       url = 'https://example.com/sitemap.xml'
@@ -159,5 +180,24 @@ class TestSitemapParser < Test::Unit::TestCase
 
   def fixture_path(name)
     File.join(__dir__, 'fixtures', name)
+  end
+
+  def capture_request_headers(url, **options)
+    local_file = fixture_path('sitemap.xml')
+    response = Typhoeus::Response.new(code: 200, headers: {}, body: File.read(local_file))
+    Typhoeus.stub(url).and_return(response)
+
+    sent_headers = nil
+    hook = lambda do |request|
+      sent_headers = request.options[:headers]
+      true
+    end
+    Typhoeus.before << hook
+    begin
+      SitemapParser.new(url, **options).to_a
+    ensure
+      Typhoeus.before.delete(hook)
+    end
+    sent_headers
   end
 end
