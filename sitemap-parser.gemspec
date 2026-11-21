@@ -15,7 +15,10 @@ Gem::Specification.new do |s|
     'homepage_uri' => 'https://github.com/benbalter/sitemap-parser',
     'source_code_uri' => 'https://github.com/benbalter/sitemap-parser',
     'bug_tracker_uri' => 'https://github.com/benbalter/sitemap-parser/issues',
-    'changelog_uri' => 'https://github.com/benbalter/sitemap-parser/blob/main/CHANGELOG.md'
+    'changelog_uri' => 'https://github.com/benbalter/sitemap-parser/blob/main/CHANGELOG.md',
+    # Trusted publishing still works: RubyGems skips the MFA check for
+    # pushes that don't use a user's API key.
+    'rubygems_mfa_required' => 'true'
   }
   s.files = ['lib/sitemap-parser.rb', 'lib/sitemap-parser/version.rb', 'LICENSE.md', 'README.md', 'CHANGELOG.md']
   s.required_ruby_version = '>= 3.0'
