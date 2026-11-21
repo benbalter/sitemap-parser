@@ -18,6 +18,10 @@ class TestSitemapParser < Test::Unit::TestCase
     @expected_count = 3
   end
 
+  def teardown
+    Typhoeus::Expectation.clear
+  end
+
   def test_array
     assert_equal Array, @sitemap.to_a.class
     assert_equal @expected_count, @sitemap.to_a.size
@@ -174,9 +178,111 @@ class TestSitemapParser < Test::Unit::TestCase
 
       assert_equal(expected, sitemap.to_a)
     end
+
+    def test_gzip_sitemap_served_as_octet_stream_or_without_content_type
+      url = 'https://example.com/sitemap.xml.gz'
+      body = File.binread(fixture_path('sitemap.xml.gz'))
+
+      [{ 'Content-Type' => 'application/octet-stream' }, {}].each do |headers|
+        Typhoeus::Expectation.clear
+        Typhoeus.stub(url).and_return(Typhoeus::Response.new(code: 200, headers: headers, body: body))
+
+        assert_equal 3, SitemapParser.new(url).to_a.size
+      end
+    end
+
+    def test_plain_xml_served_as_octet_stream
+      url = 'https://example.com/sitemap.xml'
+      body = File.read(fixture_path('sitemap.xml'))
+      headers = { 'Content-Type' => 'application/octet-stream' }
+      Typhoeus.stub(url).and_return(Typhoeus::Response.new(code: 200, headers: headers, body: body))
+
+      assert_equal 3, SitemapParser.new(url).to_a.size
+    end
+
+    def test_local_gzip_sitemap
+      assert_equal 3, SitemapParser.new(fixture_path('sitemap.xml.gz')).to_a.size
+    end
+  end
+
+  sub_test_case 'recursion' do
+    def test_index_that_lists_itself_terminates
+      index = 'https://example.com/loop_index.xml'
+      stub_body index, sitemap_index(index, 'https://example.com/sitemap.xml')
+      stub_body 'https://example.com/sitemap.xml', File.read(fixture_path('sitemap.xml'))
+
+      assert_equal 3, SitemapParser.new(index, recurse: true).to_a.size
+    end
+
+    def test_indexes_that_list_each_other_terminate
+      a = 'https://example.com/a.xml'
+      b = 'https://example.com/b.xml'
+      stub_body a, sitemap_index(b)
+      stub_body b, sitemap_index(a, 'https://example.com/sitemap.xml')
+      stub_body 'https://example.com/sitemap.xml', File.read(fixture_path('sitemap.xml'))
+
+      assert_equal 3, SitemapParser.new(a, recurse: true).to_a.size
+    end
+
+    def test_child_listed_twice_is_fetched_once
+      index = 'https://example.com/dupe_index.xml'
+      stub_body index, sitemap_index('https://example.com/sitemap.xml', 'https://example.com/sitemap.xml')
+      stub_body 'https://example.com/sitemap.xml', File.read(fixture_path('sitemap.xml'))
+
+      assert_equal 3, SitemapParser.new(index, recurse: true).to_a.size
+    end
+
+    def test_remote_index_cannot_read_local_files
+      index = 'https://example.com/evil_index.xml'
+      local = fixture_path('sitemap.xml')
+      stub_body index, sitemap_index(local)
+
+      error = assert_raise(RuntimeError) { SitemapParser.new(index, recurse: true).urls }
+      assert_match(/Refusing to read/, error.message)
+    end
+
+    def test_local_index_can_list_remote_sitemaps
+      stub_body 'https://example.com/sitemap.xml', File.read(fixture_path('sitemap.xml'))
+      Tempfile.create(['index', '.xml']) do |file|
+        file.write(sitemap_index('https://example.com/sitemap.xml'))
+        file.flush
+
+        assert_equal 3, SitemapParser.new(file.path, recurse: true).to_a.size
+      end
+    end
+  end
+
+  sub_test_case 'errors' do
+    def test_missing_local_file
+      error = assert_raise(RuntimeError) { SitemapParser.new('does/not/exist.xml').urls }
+      assert_match(/Could not read sitemap at does/, error.message)
+    end
+
+    def test_url_without_loc_raises_from_urls
+      url = 'https://example.com/bad/sitemap.xml'
+      stub_body url, File.read(fixture_path('malformed_sitemap.xml'))
+
+      assert_raise(RuntimeError.new('Malformed sitemap, url without loc')) { SitemapParser.new(url).urls }
+    end
+
+    def test_lowercase_user_agent_is_respected
+      headers = capture_request_headers('https://example.com/sitemap.xml', headers: { 'user-agent' => 'Custom' })
+
+      assert_equal 'Custom', headers['user-agent']
+      assert_not_include headers.keys, 'User-Agent'
+    end
   end
 
   private
+
+  def stub_body(url, body)
+    Typhoeus.stub(url).and_return(Typhoeus::Response.new(code: 200, headers: {}, body: body))
+  end
+
+  def sitemap_index(*locations)
+    entries = locations.map { |loc| "<sitemap><loc>#{loc}</loc></sitemap>" }.join
+    %(<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">#{entries}</sitemapindex>)
+  end
 
   def fixture_path(name)
     File.join(__dir__, 'fixtures', name)
