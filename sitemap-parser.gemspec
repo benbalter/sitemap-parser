@@ -11,15 +11,21 @@ Gem::Specification.new do |s|
   s.email = 'ben.balter@github.com'
   s.homepage = 'https://github.com/benbalter/sitemap-parser'
   s.licenses = ['MIT']
-  s.files = ['lib/sitemap-parser.rb', 'lib/sitemap-parser/version.rb']
+  s.metadata = {
+    'homepage_uri' => 'https://github.com/benbalter/sitemap-parser',
+    'source_code_uri' => 'https://github.com/benbalter/sitemap-parser',
+    'bug_tracker_uri' => 'https://github.com/benbalter/sitemap-parser/issues',
+    'changelog_uri' => 'https://github.com/benbalter/sitemap-parser/blob/main/CHANGELOG.md',
+    # Trusted publishing still works: RubyGems skips the MFA check for
+    # pushes that don't use a user's API key.
+    'rubygems_mfa_required' => 'true'
+  }
+  s.files = ['lib/sitemap-parser.rb', 'lib/sitemap-parser/version.rb', 'LICENSE.md', 'README.md', 'CHANGELOG.md']
+  s.required_ruby_version = '>= 3.0'
   s.add_dependency('nokogiri', '>= 1.6')
   s.add_dependency('typhoeus', '>= 0.6', '< 2.0')
-  s.add_development_dependency('minitest', '>= 4.7')
-  s.add_development_dependency('rake', '>= 10.4')
-  s.add_development_dependency('rubocop', '~> 0.80')
-  s.add_development_dependency('rubocop-minitest', '~> 0.1')
+  s.add_development_dependency('rake', '~> 13.0')
+  s.add_development_dependency('rubocop', '~> 1.0')
   s.add_development_dependency('rubocop-performance', '~> 1.5')
-  s.add_development_dependency('shoulda-context', '>= 2.0')
-  s.add_development_dependency('shoulda-matchers', '>= 4.0')
   s.add_development_dependency('test-unit', '>= 3.1')
 end

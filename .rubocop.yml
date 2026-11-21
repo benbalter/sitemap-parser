@@ -1,8 +1,24 @@
-inherit_from: .rubocop_todo.yml
-
-require:
+plugins:
   - rubocop-performance
-  - rubocop-minitest
 
 AllCops:
   NewCops: enable
+  SuggestExtensions: false
+
+# Development dependencies live in the gemspec, like the rest of my gems.
+Gemspec/DevelopmentDependencies:
+  EnforcedStyle: gemspec
+
+# The gem is named sitemap-parser, so its entry point is too.
+Naming/FileName:
+  Exclude:
+    - lib/sitemap-parser.rb
+
+# Test cases are long lists of examples; splitting them up doesn't help.
+Metrics:
+  Exclude:
+    - test/**/*
+
+Naming/VariableNumber:
+  Exclude:
+    - test/**/*
