@@ -15,8 +15,7 @@ Gem::Specification.new do |s|
     'homepage_uri' => 'https://github.com/benbalter/sitemap-parser',
     'source_code_uri' => 'https://github.com/benbalter/sitemap-parser',
     'bug_tracker_uri' => 'https://github.com/benbalter/sitemap-parser/issues',
-    'changelog_uri' => 'https://github.com/benbalter/sitemap-parser/blob/main/CHANGELOG.md',
-    'rubygems_mfa_required' => 'true'
+    'changelog_uri' => 'https://github.com/benbalter/sitemap-parser/blob/main/CHANGELOG.md'
   }
   s.files = ['lib/sitemap-parser.rb', 'lib/sitemap-parser/version.rb', 'LICENSE.md', 'README.md', 'CHANGELOG.md']
   s.required_ruby_version = '>= 3.0'

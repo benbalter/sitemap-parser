@@ -166,7 +166,7 @@ class TestSitemapParser < Test::Unit::TestCase
 
   sub_test_case 'gzip' do
     def test_gzip_sitemap
-      url = 'https://example.com/sitemap.xml'
+      url = 'https://example.com/gzip/sitemap.xml'
       headers = {
         'Content-Type' => 'application/gzip'
       }
@@ -192,7 +192,7 @@ class TestSitemapParser < Test::Unit::TestCase
     end
 
     def test_plain_xml_served_as_octet_stream
-      url = 'https://example.com/sitemap.xml'
+      url = 'https://example.com/octet-stream/sitemap.xml'
       body = File.read(fixture_path('sitemap.xml'))
       headers = { 'Content-Type' => 'application/octet-stream' }
       Typhoeus.stub(url).and_return(Typhoeus::Response.new(code: 200, headers: headers, body: body))

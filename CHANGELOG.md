@@ -2,7 +2,12 @@
 
 ## 0.6.0
 
-This release requires Ruby 3.0 or newer.
+### Breaking changes
+
+- Ruby 3.0 or newer is required.
+- `SitemapParser::DEFLATE_TYPE_REGEX` is gone. Gzip is detected from the file's contents instead.
+- A remote sitemap index that lists a local path, or anything else that isn't an http(s) URL, now raises instead of reading it.
+- A sitemap listed more than once in an index tree is parsed once, so its URLs no longer appear twice in `urls` or `to_a`.
 
 ### New features
 
@@ -27,5 +32,5 @@ This release requires Ruby 3.0 or newer.
 ### Maintenance
 
 - Move CI to GitHub Actions, and loosen the nokogiri constraint to `>= 1.6` (#26). Thanks to [@petergoldstein](https://github.com/petergoldstein).
-- Test on currently supported Rubies, and upgrade RuboCop to 1.x.
+- Test on Ruby 3.0, the oldest the gem allows, and every supported release, and upgrade RuboCop to 1.x.
 - Publish releases to RubyGems from GitHub Actions through trusted publishing.
