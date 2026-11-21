@@ -258,6 +258,11 @@ class TestSitemapParser < Test::Unit::TestCase
       assert_match(/Could not read sitemap at does/, error.message)
     end
 
+    def test_url_without_scheme
+      error = assert_raise(RuntimeError) { SitemapParser.new('example.com/sitemap.xml').urls }
+      assert_match(%r{Could not read sitemap at example\.com/sitemap\.xml}, error.message)
+    end
+
     def test_url_without_loc_raises_from_urls
       url = 'https://example.com/bad/sitemap.xml'
       stub_body url, File.read(fixture_path('malformed_sitemap.xml'))
